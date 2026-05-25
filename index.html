@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>西暦・和暦変換</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #1a1a2e;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      color: #aaa;
+      margin-bottom: 40px;
+      letter-spacing: 0.2em;
+    }
+
+    .drums {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .drum-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .drum-label {
+      font-size: 0.75rem;
+      color: #888;
+      letter-spacing: 0.15em;
+    }
+
+    .drum {
+      width: 110px;
+      height: 200px;
+      overflow: hidden;
+      position: relative;
+      border-radius: 12px;
+      background: #16213e;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+
+    /* 上下のフェード */
+    .drum::before, .drum::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      height: 60px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .drum::before {
+      top: 0;
+      background: linear-gradient(to bottom, #16213e, transparent);
+    }
+    .drum::after {
+      bottom: 0;
+      background: linear-gradient(to top, #16213e, transparent);
+    }
+
+    /* 選択ライン */
+    .drum-highlight {
+      position: absolute;
+      top: 50%;
+      left: 0; right: 0;
+      height: 44px;
+      transform: translateY(-50%);
+      border-top: 1px solid rgba(255,255,255,0.15);
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .drum-inner {
+      position: absolute;
+      width: 100%;
+      transition: transform 0.15s ease-out;
+    }
+
+    .drum-item {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #555;
+      transition: color 0.2s, font-size 0.2s;
+      user-select: none;
+    }
+
+    .drum-item.active {
+      color: #fff;
+      font-size: 1.6rem;
+    }
+
+    .drum-item.grayed {
+      color: #2a2a3e;
+    }
+
+    /* 西暦ドラム */
+    #seireki-drum .drum-item.active {
+      color: #e0c97f;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>西暦 · 和暦</h1>
+  <div class="drums">
+    <div class="drum-wrapper">
+      <div class="drum-label">西暦</div>
+      <div class="drum" id="seireki-drum">
+        <div class="drum-highlight"></div>
+        <div class="drum-inner" id="seireki-inner"></div>
+      </div>
+    </div>
+    <div class="drum-wrapper">
+      <div class="drum-label">昭和</div>
+      <div class="drum" id="showa-drum">
+        <div class="drum-highlight"></div>
+        <div class="drum-inner" id="showa-inner"></div>
+      </div>
+    </div>
+    <div class="drum-wrapper">
+      <div class="drum-label">平成</div>
+      <div class="drum" id="heisei-drum">
+        <div class="drum-highlight"></div>
+        <div class="drum-inner" id="heisei-inner"></div>
+      </div>
+    </div>
+    <div class="drum-wrapper">
+      <div class="drum-label">令和</div>
+      <div class="drum" id="reiwa-drum">
+        <div class="drum-highlight"></div>
+        <div class="drum-inner" id="reiwa-inner"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const ITEM_HEIGHT = 44;
+  const VISIBLE = 5; // 表示アイテム数（奇数）
+  const PADDING = Math.floor(VISIBLE / 2);
+
+  const ERAS = {
+    showa:  { start: 1926, end: 2100, offset: 1925, label: '昭和' },
+    heisei: { start: 1989, end: 2100, offset: 1988, label: '平成' },
+    reiwa:  { start: 2019, end: 2300, offset: 2018, label: '令和' },
+  };
+
+  const YEAR_MIN = 1926;
+  const YEAR_MAX = 2300;
+
+  let currentYear = new Date().getFullYear();
+
+  // 各ドラムの状態
+  const drums = {};
+
+  function initDrum(id, items, getActiveIndex) {
+    const inner = document.getElementById(id + '-inner');
+    const drumEl = document.getElementById(id + '-drum');
+
+    // パディング用空アイテム
+    for (let i = 0; i < PADDING; i++) {
+      const el = document.createElement('div');
+      el.className = 'drum-item';
+      inner.appendChild(el);
+    }
+
+    items.forEach((item, i) => {
+      const el = document.createElement('div');
+      el.className = 'drum-item';
+      el.textContent = item.text;
+      el.dataset.index = i;
+      inner.appendChild(el);
+    });
+
+    for (let i = 0; i < PADDING; i++) {
+      const el = document.createElement('div');
+      el.className = 'drum-item';
+      inner.appendChild(el);
+    }
+
+    drums[id] = { inner, items, drumEl };
+
+    // タッチ操作
+    let startY = 0;
+    let startOffset = 0;
+    let currentOffset = 0;
+    let velocity = 0;
+    let lastY = 0;
+    let lastTime = 0;
+    let animFrame = null;
+
+    function getOffset(activeIdx) {
+      return -(activeIdx * ITEM_HEIGHT);
+    }
+
+    function applyOffset(offset, animate) {
+      inner.style.transition = animate ? 'transform 0.3s ease-out' : 'none';
+      inner.style.transform = `translateY(${offset}px)`;
+    }
+
+    function snapToNearest(offset) {
+      const idx = Math.round(-offset / ITEM_HEIGHT);
+      const clamped = Math.max(0, Math.min(items.length - 1, idx));
+      return clamped;
+    }
+
+    drumEl.addEventListener('touchstart', e => {
+      cancelAnimationFrame(animFrame);
+      startY = e.touches[0].clientY;
+      lastY = startY;
+      lastTime = Date.now();
+      velocity = 0;
+      const mat = new DOMMatrix(getComputedStyle(inner).transform);
+      currentOffset = mat.m42;
+      startOffset = currentOffset;
+      inner.style.transition = 'none';
+    }, { passive: true });
+
+    drumEl.addEventListener('touchmove', e => {
+      const y = e.touches[0].clientY;
+      const now = Date.now();
+      const dt = now - lastTime;
+      if (dt > 0) velocity = (y - lastY) / dt;
+      lastY = y;
+      lastTime = now;
+      const diff = y - startY;
+      currentOffset = startOffset + diff;
+      applyOffset(currentOffset, false);
+      updateActive(id, snapToNearest(currentOffset));
+    }, { passive: true });
+
+    drumEl.addEventListener('touchend', () => {
+      let offset = currentOffset + velocity * 80;
+      let idx = snapToNearest(offset);
+      idx = Math.max(0, Math.min(items.length - 1, idx));
+      currentOffset = getOffset(idx);
+      applyOffset(currentOffset, true);
+      updateActive(id, idx);
+      if (id === 'seireki') {
+        currentYear = items[idx].value;
+        updateAllEras();
+      }
+    });
+
+    // マウス操作（PC用）
+    let mouseDown = false;
+    drumEl.addEventListener('mousedown', e => {
+      mouseDown = true;
+      startY = e.clientY;
+      lastY = startY;
+      lastTime = Date.now();
+      velocity = 0;
+      const mat = new DOMMatrix(getComputedStyle(inner).transform);
+      currentOffset = mat.m42;
+      startOffset = currentOffset;
+      inner.style.transition = 'none';
+    });
+    window.addEventListener('mousemove', e => {
+      if (!mouseDown) return;
+      const y = e.clientY;
+      const now = Date.now();
+      const dt = now - lastTime;
+      if (dt > 0) velocity = (y - lastY) / dt;
+      lastY = y;
+      lastTime = now;
+      currentOffset = startOffset + (y - startY);
+      applyOffset(currentOffset, false);
+      updateActive(id, snapToNearest(currentOffset));
+    });
+    window.addEventListener('mouseup', () => {
+      if (!mouseDown) return;
+      mouseDown = false;
+      let offset = currentOffset + velocity * 80;
+      let idx = snapToNearest(offset);
+      idx = Math.max(0, Math.min(items.length - 1, idx));
+      currentOffset = getOffset(idx);
+      applyOffset(currentOffset, true);
+      updateActive(id, idx);
+      if (id === 'seireki') {
+        currentYear = items[idx].value;
+        updateAllEras();
+      }
+    });
+
+    // 初期位置
+    const initIdx = getActiveIndex();
+    currentOffset = getOffset(initIdx);
+    applyOffset(currentOffset, false);
+    updateActive(id, initIdx);
+  }
+
+  function updateActive(id, activeIdx) {
+    const { inner, items } = drums[id];
+    const allItems = inner.querySelectorAll('.drum-item[data-index]');
+    allItems.forEach((el, i) => {
+      el.classList.remove('active', 'grayed');
+      if (i === activeIdx) {
+        el.classList.add('active');
+      } else if (items[i] && items[i].grayed) {
+        el.classList.add('grayed');
+      }
+    });
+  }
+
+  function buildEraItems(eraKey, year) {
+    const era = ERAS[eraKey];
+    const items = [];
+    for (let y = era.start; y <= era.end; y++) {
+      items.push({
+        value: y - era.offset,
+        text: y - era.offset + '年',
+        grayed: year < era.start || year > era.end,
+      });
+    }
+    return items;
+  }
+
+  function updateAllEras() {
+    const year = currentYear;
+    ['showa', 'heisei', 'reiwa'].forEach(eraKey => {
+      const era = ERAS[eraKey];
+      const { inner, items } = drums[eraKey];
+      const allItems = inner.querySelectorAll('.drum-item[data-index]');
+
+      // グレーアウト更新
+      const inRange = year >= era.start && year <= era.end;
+      allItems.forEach((el, i) => {
+        el.classList.remove('active', 'grayed');
+        if (!inRange) {
+          el.classList.add('grayed');
+        }
+      });
+
+      if (!inRange) return;
+
+      // 対応する和暦年にスクロール
+      const waYear = year - era.offset;
+      const idx = items.findIndex(it => it.value === waYear);
+      if (idx < 0) return;
+
+      const offset = -(idx * ITEM_HEIGHT);
+      inner.style.transition = 'transform 0.3s ease-out';
+      inner.style.transform = `translateY(${offset}px)`;
+      updateActive(eraKey, idx);
+    });
+  }
+
+  // 西暦リスト
+  const seirekiItems = [];
+  for (let y = YEAR_MIN; y <= YEAR_MAX; y++) {
+    seirekiItems.push({ value: y, text: y + '年' });
+  }
+
+  initDrum('seireki', seirekiItems, () => seirekiItems.findIndex(i => i.value === currentYear));
+  initDrum('showa',  buildEraItems('showa',  currentYear), () => {
+    const era = ERAS.showa;
+    const y = Math.max(era.start, Math.min(era.end, currentYear));
+    return y - era.start;
+  });
+  initDrum('heisei', buildEraItems('heisei', currentYear), () => {
+    const era = ERAS.heisei;
+    const y = Math.max(era.start, Math.min(era.end, currentYear));
+    return y - era.start;
+  });
+  initDrum('reiwa',  buildEraItems('reiwa',  currentYear), () => {
+    const era = ERAS.reiwa;
+    const y = Math.max(era.start, Math.min(era.end, currentYear));
+    return y - era.start;
+  });
+
+  updateAllEras();
+</script>
+</body>
+</html>

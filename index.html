@@ -164,7 +164,7 @@
       }
 
       .drum-item {
-        height: 40px;
+        height: 50px;
         font-size: 1.2rem;
       }
 
@@ -218,7 +218,7 @@
 </div>
 
 <script>
-  const ITEM_HEIGHT = 44;
+  const ITEM_HEIGHT = 50;
   const VISIBLE = 5; // 表示アイテム数（奇数）
   const PADDING = Math.floor(VISIBLE / 2);
 
@@ -313,8 +313,7 @@
     }, { passive: true });
 
     drumEl.addEventListener('touchend', () => {
-      let offset = currentOffset + velocity * 80;
-      let idx = snapToNearest(offset);
+      let idx = snapToNearest(currentOffset);
       idx = Math.max(0, Math.min(items.length - 1, idx));
       currentOffset = getOffset(idx);
       applyOffset(currentOffset, true);
@@ -356,8 +355,7 @@
     window.addEventListener('mouseup', () => {
       if (!mouseDown) return;
       mouseDown = false;
-      let offset = currentOffset + velocity * 80;
-      let idx = snapToNearest(offset);
+      let idx = snapToNearest(currentOffset);
       idx = Math.max(0, Math.min(items.length - 1, idx));
       currentOffset = getOffset(idx);
       applyOffset(currentOffset, true);
@@ -451,22 +449,14 @@
     seirekiItems.push({ value: y, text: y + '年' });
   }
 
+  const showaItems = buildEraItems('showa', currentYear);
+  const heiseiItems = buildEraItems('heisei', currentYear);
+  const reiwaItems  = buildEraItems('reiwa',  currentYear);
+
   initDrum('seireki', seirekiItems, () => seirekiItems.findIndex(i => i.value === currentYear));
-  initDrum('showa',  buildEraItems('showa',  currentYear), () => {
-    const era = ERAS.showa;
-    const y = Math.max(era.start, Math.min(era.end, currentYear));
-    return y - era.start;
-  });
-  initDrum('heisei', buildEraItems('heisei', currentYear), () => {
-    const era = ERAS.heisei;
-    const y = Math.max(era.start, Math.min(era.end, currentYear));
-    return y - era.start;
-  });
-  initDrum('reiwa',  buildEraItems('reiwa',  currentYear), () => {
-    const era = ERAS.reiwa;
-    const y = Math.max(era.start, Math.min(era.end, currentYear));
-    return y - era.start;
-  });
+  initDrum('showa',  showaItems,  () => showaItems.findIndex(i => i.value === currentYear - ERAS.showa.offset));
+  initDrum('heisei', heiseiItems, () => heiseiItems.findIndex(i => i.value === currentYear - ERAS.heisei.offset));
+  initDrum('reiwa',  reiwaItems,  () => reiwaItems.findIndex(i => i.value === currentYear - ERAS.reiwa.offset));
 
   updateAllEras();
 </script>

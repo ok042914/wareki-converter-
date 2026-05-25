@@ -121,6 +121,49 @@
     #seireki-drum .drum-item.active {
       color: #e0c97f;
     }
+
+    /* モバイル対応 */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1rem;
+        margin-bottom: 30px;
+      }
+
+      .drums {
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .drum-wrapper {
+        flex: 0 1 calc(50% - 4px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .drum {
+        width: 70px;
+        height: 140px;
+      }
+
+      .drum-item {
+        height: 30px;
+        font-size: 1rem;
+      }
+
+      .drum-item.active {
+        font-size: 1.2rem;
+      }
+
+      .drum-highlight {
+        height: 30px;
+      }
+
+      .container {
+        padding: 20px 10px;
+      }
+    }
   </style>
 </head>
 <body>

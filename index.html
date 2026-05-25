@@ -9,7 +9,7 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #faf7f4;
+      background: #f9f4fb;
       color: #222;
       display: flex;
       justify-content: center;
@@ -21,15 +21,15 @@
     .container {
       text-align: center;
       padding: 40px 20px;
-      width: min(100%, 460px);
+      width: min(100%, 520px);
       margin: 0 auto;
     }
 
     h1 {
-      font-size: 1.4rem;
-      color: #c97a3a;
+      font-size: 1.5rem;
+      color: #6f3b8b;
       margin-bottom: 40px;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.25em;
     }
 
     .drums {
@@ -47,9 +47,9 @@
     }
 
     .drum-label {
-      font-size: 0.75rem;
-      color: #a0a0a0;
-      letter-spacing: 0.15em;
+      font-size: 0.8rem;
+      color: #705d81;
+      letter-spacing: 0.18em;
     }
 
     .drum {
@@ -57,10 +57,10 @@
       height: 200px;
       overflow: hidden;
       position: relative;
-      border-radius: 16px;
+      border-radius: 18px;
       background: #fff;
-      border: 1px solid rgba(217, 149, 73, 0.25);
-      box-shadow: 0 10px 30px rgba(182, 137, 95, 0.1);
+      border: 1px solid rgba(125, 69, 150, 0.14);
+      box-shadow: 0 12px 32px rgba(109, 75, 128, 0.08);
     }
 
     /* 上下のフェード */
@@ -88,8 +88,8 @@
       left: 0; right: 0;
       height: 52px;
       transform: translateY(-50%);
-      border-top: 1px solid rgba(34, 34, 34, 0.15);
-      border-bottom: 1px solid rgba(34, 34, 34, 0.15);
+      border-top: 1px solid rgba(111, 59, 139, 0.18);
+      border-bottom: 1px solid rgba(111, 59, 139, 0.18);
       background: transparent;
       z-index: 1;
       pointer-events: none;
@@ -112,28 +112,28 @@
       transition: color 0.2s, font-size 0.2s, background 0.2s, transform 0.2s;
       user-select: none;
       padding: 0 10px;
-      background: #f0efed;
+      background: #f8f4fb;
     }
 
     .drum-item.active {
       color: #fff;
-      font-size: 1.9rem;
+      font-size: 1.95rem;
       background: #111;
       border: 2px solid #111;
-      border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
-      transform: scale(1.01);
+      border-radius: 14px;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+      transform: scale(1.02);
       z-index: 2;
     }
 
     .drum-item.grayed {
-      color: #b0a79c;
-      background: #f5f2ee;
+      color: #b0a7b8;
+      background: #f5f2f9;
     }
 
     /* 西暦ドラム */
     #seireki-drum .drum-item.active {
-      color: #111;
+      color: #fff;
     }
 
     /* モバイル対応 */
@@ -321,8 +321,11 @@
       updateActive(id, idx);
       if (id === 'seireki') {
         currentYear = items[idx].value;
-        updateAllEras();
+      } else {
+        const era = ERAS[id];
+        currentYear = era.offset + items[idx].value;
       }
+      updateAllEras();
     });
 
     // マウス操作（PC用）
@@ -361,8 +364,11 @@
       updateActive(id, idx);
       if (id === 'seireki') {
         currentYear = items[idx].value;
-        updateAllEras();
+      } else {
+        const era = ERAS[id];
+        currentYear = era.offset + items[idx].value;
       }
+      updateAllEras();
     });
 
     // 初期位置
@@ -400,6 +406,17 @@
 
   function updateAllEras() {
     const year = currentYear;
+
+    // 西暦ドラムを更新
+    const seireki = drums.seireki;
+    const seirekiIdx = seireki.items.findIndex(it => it.value === year);
+    if (seirekiIdx >= 0) {
+      const offset = -(seirekiIdx * ITEM_HEIGHT);
+      seireki.inner.style.transition = 'transform 0.3s ease-out';
+      seireki.inner.style.transform = `translateY(${offset}px)`;
+      updateActive('seireki', seirekiIdx);
+    }
+
     ['showa', 'heisei', 'reiwa'].forEach(eraKey => {
       const era = ERAS[eraKey];
       const { inner, items } = drums[eraKey];

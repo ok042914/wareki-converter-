@@ -130,13 +130,15 @@
       }
 
       .drums {
-        gap: 8px;
-        flex-wrap: wrap;
-        justify-content: center;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        width: 100%;
+        max-width: 180px;
+        margin: 0 auto;
       }
 
       .drum-wrapper {
-        flex: 0 1 calc(50% - 4px);
         display: flex;
         flex-direction: column;
         align-items: center;

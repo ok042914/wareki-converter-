@@ -16,6 +16,7 @@
       align-items: center;
       min-height: 100vh;
       padding: 20px 0;
+      overflow: hidden; /* ← 追加 */
     }
 
     .container {
@@ -61,9 +62,9 @@
       background: #fff;
       border: 1px solid rgba(125, 69, 150, 0.14);
       box-shadow: 0 12px 32px rgba(109, 75, 128, 0.08);
+      touch-action: none; /* ← 追加 */
     }
 
-    /* 上下のフェード */
     .drum::before, .drum::after {
       content: '';
       position: absolute;
@@ -81,7 +82,6 @@
       background: linear-gradient(to top, #ffffff, transparent);
     }
 
-    /* 選択ライン */
     .drum-highlight {
       position: absolute;
       top: 50%;
@@ -131,12 +131,10 @@
       background: #f5f2f9;
     }
 
-    /* 西暦ドラム */
     #seireki-drum .drum-item.active {
       color: #fff;
     }
 
-    /* モバイル対応 */
     @media (max-width: 768px) {
       h1 {
         font-size: 1rem;
@@ -219,7 +217,7 @@
 
 <script>
   const ITEM_HEIGHT = 50;
-  const VISIBLE = 5; // 表示アイテム数（奇数）
+  const VISIBLE = 5;
   const PADDING = Math.floor(VISIBLE / 2);
 
   const ERAS = {
@@ -233,14 +231,12 @@
 
   let currentYear = new Date().getFullYear();
 
-  // 各ドラムの状態
   const drums = {};
 
   function initDrum(id, items, getActiveIndex) {
     const inner = document.getElementById(id + '-inner');
     const drumEl = document.getElementById(id + '-drum');
 
-    // パディング用空アイテム
     for (let i = 0; i < PADDING; i++) {
       const el = document.createElement('div');
       el.className = 'drum-item';
@@ -263,7 +259,6 @@
 
     drums[id] = { inner, items, drumEl };
 
-    // タッチ操作
     let startY = 0;
     let startOffset = 0;
     let currentOffset = 0;
@@ -300,6 +295,7 @@
     }, { passive: true });
 
     drumEl.addEventListener('touchmove', e => {
+      e.preventDefault(); // ← ページスクロールを止める
       const y = e.touches[0].clientY;
       const now = Date.now();
       const dt = now - lastTime;
@@ -310,7 +306,7 @@
       currentOffset = startOffset + diff;
       applyOffset(currentOffset, false);
       updateActive(id, snapToNearest(currentOffset));
-    }, { passive: true });
+    }); // ← passive: true を削除
 
     drumEl.addEventListener('touchend', () => {
       let idx = snapToNearest(currentOffset);
@@ -327,7 +323,6 @@
       updateAllEras();
     });
 
-    // マウス操作（PC用）
     let mouseDown = false;
     drumEl.addEventListener('mousedown', e => {
       mouseDown = true;
@@ -369,7 +364,6 @@
       updateAllEras();
     });
 
-    // 初期位置
     const initIdx = getActiveIndex();
     currentOffset = getOffset(initIdx);
     applyOffset(currentOffset, false);
@@ -405,7 +399,6 @@
   function updateAllEras() {
     const year = currentYear;
 
-    // 西暦ドラムを更新
     const seireki = drums.seireki;
     const seirekiIdx = seireki.items.findIndex(it => it.value === year);
     if (seirekiIdx >= 0) {
@@ -420,7 +413,6 @@
       const { inner, items } = drums[eraKey];
       const allItems = inner.querySelectorAll('.drum-item[data-index]');
 
-      // グレーアウト更新
       const inRange = year >= era.start && year <= era.end;
       allItems.forEach((el, i) => {
         el.classList.remove('active', 'grayed');
@@ -431,7 +423,6 @@
 
       if (!inRange) return;
 
-      // 対応する和暦年にスクロール
       const waYear = year - era.offset;
       const idx = items.findIndex(it => it.value === waYear);
       if (idx < 0) return;
@@ -443,7 +434,6 @@
     });
   }
 
-  // 西暦リスト
   const seirekiItems = [];
   for (let y = YEAR_MIN; y <= YEAR_MAX; y++) {
     seirekiItems.push({ value: y, text: y + '年' });

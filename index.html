@@ -10,20 +10,23 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       background: #faf7f4;
-      color: #333;
+      color: #222;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      padding: 20px 0;
     }
 
     .container {
       text-align: center;
       padding: 40px 20px;
+      width: min(100%, 460px);
+      margin: 0 auto;
     }
 
     h1 {
-      font-size: 1.2rem;
+      font-size: 1.4rem;
       color: #c97a3a;
       margin-bottom: 40px;
       letter-spacing: 0.2em;
@@ -54,9 +57,10 @@
       height: 200px;
       overflow: hidden;
       position: relative;
-      border-radius: 12px;
-      background: #f5f0eb;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border-radius: 16px;
+      background: #fff;
+      border: 1px solid rgba(217, 149, 73, 0.25);
+      box-shadow: 0 10px 30px rgba(182, 137, 95, 0.1);
     }
 
     /* 上下のフェード */
@@ -70,11 +74,11 @@
     }
     .drum::before {
       top: 0;
-      background: linear-gradient(to bottom, #f5f0eb, transparent);
+      background: linear-gradient(to bottom, #ffffff, transparent);
     }
     .drum::after {
       bottom: 0;
-      background: linear-gradient(to top, #f5f0eb, transparent);
+      background: linear-gradient(to top, #ffffff, transparent);
     }
 
     /* 選択ライン */
@@ -82,12 +86,14 @@
       position: absolute;
       top: 50%;
       left: 0; right: 0;
-      height: 44px;
+      height: 52px;
       transform: translateY(-50%);
-      border-top: 1px solid rgba(201, 122, 58, 0.2);
-      border-bottom: 1px solid rgba(201, 122, 58, 0.2);
+      border-top: 1px solid rgba(201, 122, 58, 0.3);
+      border-bottom: 1px solid rgba(201, 122, 58, 0.3);
+      background: rgba(255, 255, 255, 0.65);
       z-index: 1;
       pointer-events: none;
+      backdrop-filter: blur(4px);
     }
 
     .drum-inner {
@@ -97,29 +103,36 @@
     }
 
     .drum-item {
-      height: 44px;
+      height: 50px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: #a8a8a8;
-      transition: color 0.2s, font-size 0.2s;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #6f5d4b;
+      transition: color 0.2s, font-size 0.2s, background 0.2s, transform 0.2s;
       user-select: none;
+      padding: 0 10px;
     }
 
     .drum-item.active {
-      color: #c97a3a;
-      font-size: 1.6rem;
+      color: #111;
+      font-size: 1.9rem;
+      background: #fff;
+      border: 1px solid #333;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+      transform: scale(1.02);
+      z-index: 2;
     }
 
     .drum-item.grayed {
-      color: #e8e5e1;
+      color: #c7b6a6;
     }
 
     /* 西暦ドラム */
     #seireki-drum .drum-item.active {
-      color: #d99549;
+      color: #111;
     }
 
     /* モバイル対応 */
@@ -145,21 +158,21 @@
       }
 
       .drum {
-        width: 70px;
-        height: 140px;
+        width: 84px;
+        height: 170px;
       }
 
       .drum-item {
-        height: 30px;
-        font-size: 1rem;
-      }
-
-      .drum-item.active {
+        height: 40px;
         font-size: 1.2rem;
       }
 
+      .drum-item.active {
+        font-size: 1.5rem;
+      }
+
       .drum-highlight {
-        height: 30px;
+        height: 40px;
       }
 
       .container {

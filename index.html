@@ -269,7 +269,7 @@
     let animFrame = null;
 
     function getOffset(activeIdx) {
-      return -(activeIdx * ITEM_HEIGHT + PADDING * ITEM_HEIGHT - ITEM_HEIGHT / 2);
+      return -(activeIdx * ITEM_HEIGHT) + (ITEM_HEIGHT / 2);
     }
 
     function applyOffset(offset, animate) {
@@ -403,7 +403,7 @@
     const seireki = drums.seireki;
     const seirekiIdx = seireki.items.findIndex(it => it.value === year);
     if (seirekiIdx >= 0) {
-      const offset = -(seirekiIdx * ITEM_HEIGHT + PADDING * ITEM_HEIGHT - ITEM_HEIGHT / 2);
+      const offset = -(seirekiIdx * ITEM_HEIGHT) + (ITEM_HEIGHT / 2);
       seireki.inner.style.transition = 'transform 0.3s ease-out';
       seireki.inner.style.transform = `translateY(${offset}px)`;
       updateActive('seireki', seirekiIdx);
@@ -428,7 +428,7 @@
       const idx = items.findIndex(it => it.value === waYear);
       if (idx < 0) return;
 
-      const offset = -(idx * ITEM_HEIGHT + PADDING * ITEM_HEIGHT - ITEM_HEIGHT / 2);
+      const offset = -(idx * ITEM_HEIGHT) + (ITEM_HEIGHT / 2);
       inner.style.transition = 'transform 0.3s ease-out';
       inner.style.transform = `translateY(${offset}px)`;
       updateActive(eraKey, idx);

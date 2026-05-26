@@ -269,7 +269,7 @@
     let animFrame = null;
 
     function getOffset(activeIdx) {
-      return -(activeIdx * ITEM_HEIGHT);
+      return -(activeIdx * ITEM_HEIGHT + PADDING * ITEM_HEIGHT - ITEM_HEIGHT / 2);
     }
 
     function applyOffset(offset, animate) {
